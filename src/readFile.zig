@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn getLinesFromFile(filename: []const u8) !std.ArrayList([]const u8) {
+pub fn getLinesFromFile(filename: []const u8) !std.ArrayList([]u8) {
     const prefix_path = "./input/";
     var path_buffer: [std.fs.max_path_bytes]u8 = undefined;
     const full_path = try std.fmt.bufPrint(&path_buffer, "{s}{s}", .{ prefix_path, filename });
@@ -11,7 +11,8 @@ pub fn getLinesFromFile(filename: []const u8) !std.ArrayList([]const u8) {
     var buf_reader = std.io.bufferedReader(file.reader());
     var in_stream = buf_reader.reader();
 
-    var lines = std.ArrayList([]const u8).init(std.heap.page_allocator);
+    var lines: std.ArrayListAligned([]u8, null) = undefined;
+    lines = std.ArrayList([]u8).init(std.heap.page_allocator);
     errdefer {
         for (lines.items) |line| {
             std.heap.page_allocator.free(line);

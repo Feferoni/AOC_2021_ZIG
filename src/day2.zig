@@ -12,7 +12,7 @@ fn getDirectionFromString(direction_str: []const u8) !Direction {
     return error.InvalidDirectionStr;
 }
 
-fn convertLinesToInstructions(lines: std.ArrayList([]const u8)) ![]Instruction {
+fn convertLinesToInstructions(lines: std.ArrayList([]u8)) ![]Instruction {
     var instructions = std.ArrayList(Instruction).init(std.heap.page_allocator);
     errdefer instructions.deinit();
 
@@ -93,7 +93,7 @@ test "part1" {
     const instructions = try convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
-    try std.testing.expectEqual(150, getPart1Value(&instructions));
+    try std.testing.expectEqual(150, getPart1Value(instructions));
 }
 
 test "part2" {
@@ -103,5 +103,5 @@ test "part2" {
     const instructions = try convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
-    try std.testing.expectEqual(900, getPart2Value(&instructions));
+    try std.testing.expectEqual(900, getPart2Value(instructions));
 }

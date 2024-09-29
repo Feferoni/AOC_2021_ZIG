@@ -1,8 +1,5 @@
 const std = @import("std");
 
-// Although this function looks imperative, note that its job is to
-// declaratively construct a build graph that will be executed by an external
-// runner.
 pub fn build(b: *std.Build) void {
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
@@ -52,13 +49,34 @@ pub fn build(b: *std.Build) void {
 
     // Creates a step for unit testing. This only builds the test executable
     // but does not run it.
-    const lib_unit_tests = b.addTest(.{
-        .root_source_file = b.path("src/day1.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
+    const test_step = b.step("test", "Run unit tests");
+    const src_dir = std.fs.cwd().openDir("src", .{ .iterate = true }) catch |err| {
+        std.debug.print("Error opening src directory: {}\n", .{err});
+        return;
+    };
 
-    const run_lib_unit_tests = b.addRunArtifact(lib_unit_tests);
+    var iter = src_dir.iterate();
+    while (iter.next() catch |err| {
+        std.debug.print("Error iterating directory: {}\n", .{err});
+        return;
+    }) |entry| {
+        if (std.mem.startsWith(u8, entry.name, "day") and std.mem.endsWith(u8, entry.name, ".zig")) {
+            const prefix_path = "src";
+            var path_buffer: [std.fs.max_path_bytes]u8 = undefined;
+            const full_path = std.fmt.bufPrint(&path_buffer, "{s}/{s}", .{ prefix_path, entry.name }) catch |err| {
+                std.debug.print("Error concatinating src with file: {}\n", .{err});
+                continue;
+            };
+
+            const test_artifact = b.addTest(.{
+                .root_source_file = b.path(full_path),
+                .target = target,
+                .optimize = optimize,
+            });
+            const run_test = b.addRunArtifact(test_artifact);
+            test_step.dependOn(&run_test.step);
+        }
+    }
 
     const exe_unit_tests = b.addTest(.{
         .root_source_file = b.path("src/main.zig"),
@@ -71,7 +89,5 @@ pub fn build(b: *std.Build) void {
     // Similar to creating the run step earlier, this exposes a `test` step to
     // the `zig build --help` menu, providing a way for the user to request
     // running the unit tests.
-    const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_exe_unit_tests.step);
 }

@@ -9,7 +9,7 @@ fn sumRange(slice: []const u32, start: usize, end: usize) u32 {
     return sum;
 }
 
-fn convertStringsToNumbers(lines: std.ArrayList([]const u8)) ![]u32 {
+fn convertStringsToNumbers(lines: std.ArrayList([]u8)) ![]u32 {
     var numbers = std.ArrayList(u32).init(std.heap.page_allocator);
     errdefer numbers.deinit();
 
