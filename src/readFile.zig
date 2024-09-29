@@ -1,11 +1,15 @@
 const std = @import("std");
 
-pub fn getLinesFromFile(filename: []const u8) !std.ArrayList([]u8) {
+pub fn getLinesFromFile(filename: []const u8) std.ArrayList([]u8) {
     const prefix_path = "./input/";
     var path_buffer: [std.fs.max_path_bytes]u8 = undefined;
-    const full_path = try std.fmt.bufPrint(&path_buffer, "{s}{s}", .{ prefix_path, filename });
+    const full_path = std.fmt.bufPrint(&path_buffer, "{s}{s}", .{ prefix_path, filename }) catch |err| {
+        std.debug.panic("Failed bufPrint with err: {}", .{err});
+    };
 
-    const file = try std.fs.cwd().openFile(full_path, .{});
+    const file = std.fs.cwd().openFile(full_path, .{}) catch |err| {
+        std.debug.panic("Failed to open file: {s} - err: {}", .{ full_path, err });
+    };
     defer file.close();
 
     var buf_reader = std.io.bufferedReader(file.reader());
@@ -21,9 +25,15 @@ pub fn getLinesFromFile(filename: []const u8) !std.ArrayList([]u8) {
     }
 
     var buf: [1024]u8 = undefined;
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        const dup = try std.heap.page_allocator.dupe(u8, line);
-        try lines.append(dup);
+    while (in_stream.readUntilDelimiterOrEof(&buf, '\n') catch |err| {
+        std.debug.panic("Failed to read in_stream - err: {}", .{err});
+    }) |line| {
+        const dup = std.heap.page_allocator.dupe(u8, line) catch |err| {
+            std.debug.panic("Failed to dupe - err: {}", .{err});
+        };
+        lines.append(dup) catch |err| {
+            std.debug.panic("Failed to append - err: {}", .{err});
+        };
     }
 
     return lines;

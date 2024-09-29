@@ -4,32 +4,34 @@ const readFile = @import("readFile.zig");
 const Direction = enum { forward, down, up };
 const Instruction = struct { direction: Direction, distance: u32 };
 
-fn getDirectionFromString(direction_str: []const u8) !Direction {
+fn getDirectionFromString(direction_str: []const u8) Direction {
     if (std.mem.eql(u8, "forward", direction_str)) return Direction.forward;
     if (std.mem.eql(u8, "down", direction_str)) return Direction.down;
     if (std.mem.eql(u8, "up", direction_str)) return Direction.up;
 
-    return error.InvalidDirectionStr;
+    unreachable;
 }
 
-fn convertLinesToInstructions(lines: std.ArrayList([]u8)) ![]Instruction {
+fn convertLinesToInstructions(lines: std.ArrayList([]u8)) []Instruction {
     var instructions = std.ArrayList(Instruction).init(std.heap.page_allocator);
     errdefer instructions.deinit();
 
     for (lines.items) |line| {
         var iterator = std.mem.splitAny(u8, line, " ");
 
-        const direction_str = iterator.next() orelse return error.faultyDirection;
-        const direction = try getDirectionFromString(direction_str);
+        const direction_str = iterator.next() orelse unreachable;
+        const direction = getDirectionFromString(direction_str);
 
-        const value_str = iterator.next() orelse return error.faultyValue;
-        const distance = try std.fmt.parseInt(u32, value_str, 10);
+        const value_str = iterator.next() orelse unreachable;
+        const distance = std.fmt.parseInt(u32, value_str, 10) catch |err| {
+            std.debug.panic("Failed to parse \"{s}\" to int - err: {}", .{ value_str, err });
+        };
 
         const instruction = Instruction{ .direction = direction, .distance = distance };
-        try instructions.append(instruction);
+        instructions.append(instruction) catch unreachable;
     }
 
-    return instructions.toOwnedSlice();
+    return instructions.toOwnedSlice() catch unreachable;
 }
 
 fn getPart1Value(instructions: []const Instruction) u32 {
@@ -66,28 +68,28 @@ fn getPart2Value(instructions: []const Instruction) u32 {
     return depth * distance;
 }
 
-pub fn part1() !void {
-    const lines = try readFile.getLinesFromFile("day2.txt");
+pub fn part1() void {
+    const lines = readFile.getLinesFromFile("day2.txt");
     defer lines.deinit();
 
-    const instructions = try convertLinesToInstructions(lines);
+    const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
     std.debug.print("Part1 value: {}\n", .{getPart1Value(instructions)});
 }
 
-pub fn part2() !void {
-    const lines = try readFile.getLinesFromFile("day2.txt");
+pub fn part2() void {
+    const lines = readFile.getLinesFromFile("day2.txt");
     defer lines.deinit();
 
-    const instructions = try convertLinesToInstructions(lines);
+    const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
     std.debug.print("Part2 value: {}\n", .{getPart2Value(instructions)});
 }
 
 test "part1" {
-    const lines = try readFile.getLinesFromFile("day2_test.txt");
+    const lines = readFile.getLinesFromFile("day2_test.txt");
     defer lines.deinit();
 
     const instructions = try convertLinesToInstructions(lines);
@@ -97,7 +99,7 @@ test "part1" {
 }
 
 test "part2" {
-    const lines = try readFile.getLinesFromFile("day2_test.txt");
+    const lines = readFile.getLinesFromFile("day2_test.txt");
     defer lines.deinit();
 
     const instructions = try convertLinesToInstructions(lines);

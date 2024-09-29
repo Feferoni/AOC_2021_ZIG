@@ -9,16 +9,19 @@ fn sumRange(slice: []const u32, start: usize, end: usize) u32 {
     return sum;
 }
 
-fn convertStringsToNumbers(lines: std.ArrayList([]u8)) ![]u32 {
+fn convertStringsToNumbers(lines: std.ArrayList([]u8)) []u32 {
     var numbers = std.ArrayList(u32).init(std.heap.page_allocator);
     errdefer numbers.deinit();
 
     for (lines.items) |line| {
-        const number = try std.fmt.parseInt(u32, line, 10);
-        try numbers.append(number);
+        const number = std.fmt.parseInt(u32, line, 10) catch |err| {
+            std.debug.panic("Failed to parse \"{s}\" to an int - err: {}", .{ line, err });
+        };
+
+        numbers.append(number) catch unreachable;
     }
 
-    return numbers.toOwnedSlice();
+    return numbers.toOwnedSlice() catch unreachable;
 }
 
 fn getNumberOfIncreases1(depths: []const u32) u32 {
@@ -47,21 +50,21 @@ fn getNumberOfIncreases2(depths: []const u32, window_size: u32) u32 {
     return count;
 }
 
-pub fn part1() !void {
-    const lines = try readFile.getLinesFromFile("day1.txt");
+pub fn part1() void {
+    const lines = readFile.getLinesFromFile("day1.txt");
     defer lines.deinit();
 
-    const depthScan = try convertStringsToNumbers(lines);
+    const depthScan = convertStringsToNumbers(lines);
     defer std.heap.page_allocator.free(depthScan);
 
     std.debug.print("part1 result: {}\n", .{getNumberOfIncreases1(depthScan)});
 }
 
-pub fn part2() !void {
-    const lines = try readFile.getLinesFromFile("day1.txt");
+pub fn part2() void {
+    const lines = readFile.getLinesFromFile("day1.txt");
     defer lines.deinit();
 
-    const depthScan = try convertStringsToNumbers(lines);
+    const depthScan = convertStringsToNumbers(lines);
     defer std.heap.page_allocator.free(depthScan);
 
     std.debug.print("part2 result: {}\n", .{getNumberOfIncreases2(depthScan, 3)});

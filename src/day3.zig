@@ -5,7 +5,7 @@ const BitCount = struct { zero: u32, one: u32 };
 
 fn bitsToDecimal(bits: []const u8) u64 {
     if (bits.len > 64) {
-        std.debug.assert(true);
+        unreachable;
     }
 
     var result: u64 = 0;
@@ -14,7 +14,7 @@ fn bitsToDecimal(bits: []const u8) u64 {
         switch (bit) {
             '0' => result = (result << 1),
             '1' => result = (result << 1) | 1,
-            else => std.debug.assert(true),
+            else => unreachable,
         }
     }
 
@@ -50,13 +50,15 @@ fn calculateBitCountsByIndex(lines: std.ArrayList([]u8), index: usize) BitCount 
     return bitCount;
 }
 
-fn calculateBitCounts(lines: std.ArrayList([]u8)) ![]BitCount {
+fn calculateBitCounts(lines: std.ArrayList([]u8)) []BitCount {
     std.debug.assert(lines.items.len > 0);
     std.debug.assert(lines.items[0].len > 0);
 
     const nrOfBits = lines.items[0].len;
 
-    var bitCounts = try std.heap.page_allocator.alloc(BitCount, nrOfBits);
+    var bitCounts = std.heap.page_allocator.alloc(BitCount, nrOfBits) catch {
+        unreachable;
+    };
     @memset(bitCounts, BitCount{ .zero = 0, .one = 0 });
 
     for (0..nrOfBits) |i| {
@@ -66,8 +68,10 @@ fn calculateBitCounts(lines: std.ArrayList([]u8)) ![]BitCount {
     return bitCounts;
 }
 
-fn convertBitCountToGamma(bitCounts: []const BitCount) !u64 {
-    var bits = try std.heap.page_allocator.alloc(u8, bitCounts.len);
+fn convertBitCountToGamma(bitCounts: []const BitCount) u64 {
+    var bits = std.heap.page_allocator.alloc(u8, bitCounts.len) catch {
+        unreachable;
+    };
     defer std.heap.page_allocator.free(bits);
 
     for (bitCounts, 0..) |bitCount, i| {
@@ -95,9 +99,9 @@ fn getBitToKeep(keepMostPresentBit: bool, bitCount: BitCount) u8 {
     }
 }
 
-fn getPartTwoValue(lines: std.ArrayList([]u8), keepMostPresentBit: bool) !u64 {
+fn getPartTwoValue(lines: std.ArrayList([]u8), keepMostPresentBit: bool) u64 {
     // Make temporary since we need to remove lines, and lines needs to be used again
-    var lines_tmp = try lines.clone();
+    var lines_tmp = lines.clone() catch unreachable;
 
     var i: usize = 0;
     while (i < lines_tmp.items[0].len) : (i += 1) {
@@ -118,26 +122,26 @@ fn getPartTwoValue(lines: std.ArrayList([]u8), keepMostPresentBit: bool) !u64 {
         }
     }
 
-    return error.WTF;
+    unreachable;
 }
 
-pub fn part1() !void {
-    const lines = try readFile.getLinesFromFile("day3.txt");
+pub fn part1() void {
+    const lines = readFile.getLinesFromFile("day3.txt");
     defer lines.deinit();
 
-    const bitCounts = try calculateBitCounts(lines);
-    const gammaRate = try convertBitCountToGamma(bitCounts);
+    const bitCounts = calculateBitCounts(lines);
+    const gammaRate = convertBitCountToGamma(bitCounts);
     const epsilonRate = flipUpToMSB(gammaRate);
 
     std.debug.print("Part1 result: {}\n", .{gammaRate * epsilonRate});
 }
 
-pub fn part2() !void {
-    var lines = try readFile.getLinesFromFile("day3.txt");
+pub fn part2() void {
+    var lines = readFile.getLinesFromFile("day3.txt");
     defer lines.deinit();
 
-    const oxygen_generator_rating = try getPartTwoValue(lines, true);
-    const co2_scrubber_rating = try getPartTwoValue(lines, false);
+    const oxygen_generator_rating = getPartTwoValue(lines, true);
+    const co2_scrubber_rating = getPartTwoValue(lines, false);
 
     std.debug.print("Part2 result: {}\n", .{oxygen_generator_rating * co2_scrubber_rating});
 }
@@ -160,18 +164,18 @@ test "flipUpToMSB" {
 }
 
 test "part1" {
-    const lines = try readFile.getLinesFromFile("day3_test.txt");
+    const lines = readFile.getLinesFromFile("day3_test.txt");
     defer lines.deinit();
-    const bitCounts = try calculateBitCounts(lines);
-    const gammaRate = try convertBitCountToGamma(bitCounts);
+    const bitCounts = calculateBitCounts(lines);
+    const gammaRate = convertBitCountToGamma(bitCounts);
     const epsilonRate = flipUpToMSB(gammaRate);
     try std.testing.expectEqual(22, gammaRate);
     try std.testing.expectEqual(9, epsilonRate);
 }
 
 test "part2" {
-    var lines = try readFile.getLinesFromFile("day3_test.txt");
+    var lines = readFile.getLinesFromFile("day3_test.txt");
     defer lines.deinit();
-    try std.testing.expectEqual(23, try getPartTwoValue(lines, true));
-    try std.testing.expectEqual(10, try getPartTwoValue(lines, false));
+    try std.testing.expectEqual(23, getPartTwoValue(lines, true));
+    try std.testing.expectEqual(10, getPartTwoValue(lines, false));
 }

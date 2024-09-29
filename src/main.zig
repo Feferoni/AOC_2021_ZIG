@@ -4,12 +4,12 @@ const day2 = @import("day2.zig");
 const day3 = @import("day3.zig");
 
 pub fn main() !void {
-    try day1.part1();
-    try day1.part2();
+    day1.part1();
+    day1.part2();
 
-    try day2.part1();
-    try day2.part2();
+    day2.part1();
+    day2.part2();
 
-    try day3.part1();
-    try day3.part2();
+    day3.part1();
+    day3.part2();
 }
