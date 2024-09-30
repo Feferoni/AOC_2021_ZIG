@@ -1,13 +1,6 @@
 const std = @import("std");
 const readFile = @import("readFile.zig");
-
-fn sumRange(slice: []const u32, start: usize, end: usize) u32 {
-    var sum: u32 = 0;
-    for (slice[start..end]) |num| {
-        sum += num;
-    }
-    return sum;
-}
+const util = @import("util.zig");
 
 fn convertStringsToNumbers(lines: std.ArrayList([]u8)) []u32 {
     var numbers = std.ArrayList(u32).init(std.heap.page_allocator);
@@ -39,10 +32,10 @@ fn getNumberOfIncreases2(depths: []const u32, window_size: u32) u32 {
     var count: u32 = 0;
 
     var i: usize = window_size + 1;
-    var prev: u32 = sumRange(depths, 0, window_size);
+    var prev: u32 = util.sumRange(depths, 0, window_size);
 
     while (i <= depths.len) : (i += 1) {
-        const curr = sumRange(depths, i - window_size, i);
+        const curr = util.sumRange(depths, i - window_size, i);
         if (curr > prev) count += 1;
         prev = curr;
     }

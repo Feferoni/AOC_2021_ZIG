@@ -56,9 +56,7 @@ fn calculateBitCounts(lines: std.ArrayList([]u8)) []BitCount {
 
     const nrOfBits = lines.items[0].len;
 
-    var bitCounts = std.heap.page_allocator.alloc(BitCount, nrOfBits) catch {
-        unreachable;
-    };
+    var bitCounts = std.heap.page_allocator.alloc(BitCount, nrOfBits) catch unreachable;
     @memset(bitCounts, BitCount{ .zero = 0, .one = 0 });
 
     for (0..nrOfBits) |i| {
@@ -69,9 +67,7 @@ fn calculateBitCounts(lines: std.ArrayList([]u8)) []BitCount {
 }
 
 fn convertBitCountToGamma(bitCounts: []const BitCount) u64 {
-    var bits = std.heap.page_allocator.alloc(u8, bitCounts.len) catch {
-        unreachable;
-    };
+    var bits = std.heap.page_allocator.alloc(u8, bitCounts.len) catch unreachable;
     defer std.heap.page_allocator.free(bits);
 
     for (bitCounts, 0..) |bitCount, i| {

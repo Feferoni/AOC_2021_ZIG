@@ -92,7 +92,7 @@ test "part1" {
     const lines = readFile.getLinesFromFile("day2_test.txt");
     defer lines.deinit();
 
-    const instructions = try convertLinesToInstructions(lines);
+    const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
     try std.testing.expectEqual(150, getPart1Value(instructions));
@@ -102,7 +102,7 @@ test "part2" {
     const lines = readFile.getLinesFromFile("day2_test.txt");
     defer lines.deinit();
 
-    const instructions = try convertLinesToInstructions(lines);
+    const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
     try std.testing.expectEqual(900, getPart2Value(instructions));
