@@ -68,9 +68,14 @@ fn getPart2Value(instructions: []const Instruction) u32 {
     return depth * distance;
 }
 
-pub fn part1() void {
-    const lines = readFile.getLinesFromFile("day2.txt");
-    defer lines.deinit();
+pub fn part1(allocator: std.mem.Allocator) void {
+    const lines = readFile.getLinesFromFile("day2.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 
     const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
@@ -78,9 +83,14 @@ pub fn part1() void {
     std.debug.print("Part1 value: {}\n", .{getPart1Value(instructions)});
 }
 
-pub fn part2() void {
-    const lines = readFile.getLinesFromFile("day2.txt");
-    defer lines.deinit();
+pub fn part2(allocator: std.mem.Allocator) void {
+    const lines = readFile.getLinesFromFile("day2.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 
     const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
@@ -89,8 +99,14 @@ pub fn part2() void {
 }
 
 test "part1" {
-    const lines = readFile.getLinesFromFile("day2_test.txt");
-    defer lines.deinit();
+    const allocator = std.testing.allocator;
+    const lines = readFile.getLinesFromFile("day2_test.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 
     const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
@@ -99,8 +115,14 @@ test "part1" {
 }
 
 test "part2" {
-    const lines = readFile.getLinesFromFile("day2_test.txt");
-    defer lines.deinit();
+    const allocator = std.testing.allocator;
+    const lines = readFile.getLinesFromFile("day2_test.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 
     const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);

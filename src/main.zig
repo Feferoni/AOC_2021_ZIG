@@ -5,12 +5,24 @@ const day3 = @import("day3.zig");
 const day4 = @import("day4.zig");
 
 pub fn main() !void {
-    day1.part1();
-    day1.part2();
-    day2.part1();
-    day2.part2();
-    day3.part1();
-    day3.part2();
-    day4.part1();
-    day4.part2();
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer {
+        const leaked = gpa.deinit();
+        switch (leaked) {
+            .ok => {},
+            .leak => {
+                std.debug.print("Leaked", .{});
+            },
+        }
+    }
+    const allocator = gpa.allocator();
+
+    day1.part1(allocator);
+    day1.part2(allocator);
+    day2.part1(allocator);
+    day2.part2(allocator);
+    day3.part1(allocator);
+    day3.part2(allocator);
+    day4.part1(allocator);
+    // day4.part2(allocator);
 }

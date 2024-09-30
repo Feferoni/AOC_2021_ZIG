@@ -50,13 +50,13 @@ fn calculateBitCountsByIndex(lines: std.ArrayList([]u8), index: usize) BitCount 
     return bitCount;
 }
 
-fn calculateBitCounts(lines: std.ArrayList([]u8)) []BitCount {
+fn calculateBitCounts(allocator: std.mem.Allocator, lines: std.ArrayList([]u8)) []BitCount {
     std.debug.assert(lines.items.len > 0);
     std.debug.assert(lines.items[0].len > 0);
 
     const nrOfBits = lines.items[0].len;
 
-    var bitCounts = std.heap.page_allocator.alloc(BitCount, nrOfBits) catch unreachable;
+    var bitCounts = allocator.alloc(BitCount, nrOfBits) catch unreachable;
     @memset(bitCounts, BitCount{ .zero = 0, .one = 0 });
 
     for (0..nrOfBits) |i| {
@@ -66,9 +66,11 @@ fn calculateBitCounts(lines: std.ArrayList([]u8)) []BitCount {
     return bitCounts;
 }
 
-fn convertBitCountToGamma(bitCounts: []const BitCount) u64 {
-    var bits = std.heap.page_allocator.alloc(u8, bitCounts.len) catch unreachable;
-    defer std.heap.page_allocator.free(bits);
+fn convertBitCountToGamma(allocator: std.mem.Allocator, bitCounts: []const BitCount) u64 {
+    if (bitCounts.len == 0) return 0;
+
+    var bits = allocator.alloc(u8, bitCounts.len) catch unreachable;
+    defer allocator.free(bits);
 
     for (bitCounts, 0..) |bitCount, i| {
         bits[i] = if (bitCount.one > bitCount.zero) '1' else '0';
@@ -98,6 +100,7 @@ fn getBitToKeep(keepMostPresentBit: bool, bitCount: BitCount) u8 {
 fn getPartTwoValue(lines: std.ArrayList([]u8), keepMostPresentBit: bool) u64 {
     // Make temporary since we need to remove lines, and lines needs to be used again
     var lines_tmp = lines.clone() catch unreachable;
+    defer lines_tmp.deinit();
 
     var i: usize = 0;
     while (i < lines_tmp.items[0].len) : (i += 1) {
@@ -121,20 +124,31 @@ fn getPartTwoValue(lines: std.ArrayList([]u8), keepMostPresentBit: bool) u64 {
     unreachable;
 }
 
-pub fn part1() void {
-    const lines = readFile.getLinesFromFile("day3.txt");
-    defer lines.deinit();
+pub fn part1(allocator: std.mem.Allocator) void {
+    const lines = readFile.getLinesFromFile("day3.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 
-    const bitCounts = calculateBitCounts(lines);
-    const gammaRate = convertBitCountToGamma(bitCounts);
+    const bitCounts = calculateBitCounts(allocator, lines);
+    defer allocator.free(bitCounts);
+    const gammaRate = convertBitCountToGamma(allocator, bitCounts);
     const epsilonRate = flipUpToMSB(gammaRate);
 
     std.debug.print("Part1 result: {}\n", .{gammaRate * epsilonRate});
 }
 
-pub fn part2() void {
-    var lines = readFile.getLinesFromFile("day3.txt");
-    defer lines.deinit();
+pub fn part2(allocator: std.mem.Allocator) void {
+    var lines = readFile.getLinesFromFile("day3.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 
     const oxygen_generator_rating = getPartTwoValue(lines, true);
     const co2_scrubber_rating = getPartTwoValue(lines, false);
@@ -160,18 +174,33 @@ test "flipUpToMSB" {
 }
 
 test "part1" {
-    const lines = readFile.getLinesFromFile("day3_test.txt");
-    defer lines.deinit();
-    const bitCounts = calculateBitCounts(lines);
-    const gammaRate = convertBitCountToGamma(bitCounts);
+    const allocator = std.testing.allocator;
+    const lines = readFile.getLinesFromFile("day3_test.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
+
+    const bitCounts = calculateBitCounts(allocator, lines);
+    defer allocator.free(bitCounts);
+    const gammaRate = convertBitCountToGamma(allocator, bitCounts);
     const epsilonRate = flipUpToMSB(gammaRate);
     try std.testing.expectEqual(22, gammaRate);
     try std.testing.expectEqual(9, epsilonRate);
 }
 
 test "part2" {
-    var lines = readFile.getLinesFromFile("day3_test.txt");
-    defer lines.deinit();
+    const allocator = std.testing.allocator;
+    var lines = readFile.getLinesFromFile("day3_test.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
+
     try std.testing.expectEqual(23, getPartTwoValue(lines, true));
     try std.testing.expectEqual(10, getPartTwoValue(lines, false));
 }

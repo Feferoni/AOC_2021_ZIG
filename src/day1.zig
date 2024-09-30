@@ -43,9 +43,14 @@ fn getNumberOfIncreases2(depths: []const u32, window_size: u32) u32 {
     return count;
 }
 
-pub fn part1() void {
-    const lines = readFile.getLinesFromFile("day1.txt");
-    defer lines.deinit();
+pub fn part1(allocator: std.mem.Allocator) void {
+    const lines = readFile.getLinesFromFile("day1.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 
     const depthScan = convertStringsToNumbers(lines);
     defer std.heap.page_allocator.free(depthScan);
@@ -53,9 +58,14 @@ pub fn part1() void {
     std.debug.print("part1 result: {}\n", .{getNumberOfIncreases1(depthScan)});
 }
 
-pub fn part2() void {
-    const lines = readFile.getLinesFromFile("day1.txt");
-    defer lines.deinit();
+pub fn part2(allocator: std.mem.Allocator) void {
+    const lines = readFile.getLinesFromFile("day1.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 
     const depthScan = convertStringsToNumbers(lines);
     defer std.heap.page_allocator.free(depthScan);

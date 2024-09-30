@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn getLinesFromFile(filename: []const u8) std.ArrayList([]u8) {
+pub fn getLinesFromFile(filename: []const u8, allocator: std.mem.Allocator) std.ArrayList([]u8) {
     const prefix_path = "./input/";
     var path_buffer: [std.fs.max_path_bytes]u8 = undefined;
     const full_path = std.fmt.bufPrint(&path_buffer, "{s}{s}", .{ prefix_path, filename }) catch |err| {
@@ -15,7 +15,7 @@ pub fn getLinesFromFile(filename: []const u8) std.ArrayList([]u8) {
     var in_stream = buf_reader.reader();
 
     var lines: std.ArrayListAligned([]u8, null) = undefined;
-    lines = std.ArrayList([]u8).init(std.heap.page_allocator);
+    lines = std.ArrayList([]u8).init(allocator);
     errdefer {
         for (lines.items) |line| {
             std.heap.page_allocator.free(line);
@@ -25,9 +25,20 @@ pub fn getLinesFromFile(filename: []const u8) std.ArrayList([]u8) {
 
     var buf: [1024]u8 = undefined;
     while (in_stream.readUntilDelimiterOrEof(&buf, '\n') catch unreachable) |line| {
-        const dup = std.heap.page_allocator.dupe(u8, line) catch unreachable;
+        const dup = allocator.dupe(u8, line) catch unreachable;
         lines.append(dup) catch unreachable;
     }
 
     return lines;
+}
+
+test "getLinesFromFile" {
+    const allocator = std.testing.allocator;
+    const lines = getLinesFromFile("day2_test.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 }

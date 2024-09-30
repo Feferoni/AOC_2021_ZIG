@@ -189,16 +189,28 @@ fn playGamePart2(game: *GameData) u32 {
     unreachable;
 }
 
-pub fn part1() void {
-    const lines = readFile.getLinesFromFile("day4.txt");
-    defer lines.deinit();
+pub fn part1(allocator: std.mem.Allocator) void {
+    const lines = readFile.getLinesFromFile("day4.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
+
     var game = getGameData(lines);
+
     std.debug.print("Part1 result: {}\n", .{playGamePart1(&game)});
 }
 
-pub fn part2() void {
-    var lines = readFile.getLinesFromFile("day4.txt");
-    defer lines.deinit();
+pub fn part2(allocator: std.mem.Allocator) void {
+    var lines = readFile.getLinesFromFile("day4.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
+    }
 
     var game = getGameData(lines);
     std.debug.print("Part2 result: {}\n", .{playGamePart2(&game)});
@@ -225,16 +237,13 @@ test "getRowNumbers" {
 }
 
 test "getGameData" {
-    const lines = readFile.getLinesFromFile("day4_test.txt");
-    defer lines.deinit();
-    const game = getGameData(lines);
-
-    for (game.boards) |board| {
-        board.print();
-        std.debug.print("\n", .{});
+    const allocator = std.testing.allocator;
+    const lines = readFile.getLinesFromFile("day4_test.txt", allocator);
+    defer {
+        for (lines.items) |line| {
+            allocator.free(line);
+        }
+        lines.deinit();
     }
-}
-
-test "part2" {
-    // try std.testing.expectEqual(10, getPartTwoValue(lines, false));
+    _ = getGameData(lines);
 }
