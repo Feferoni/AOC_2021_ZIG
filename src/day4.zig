@@ -218,32 +218,29 @@ pub fn part2(allocator: std.mem.Allocator) void {
 
 test "getDrawNumbers" {
     const numbers = getDrawNumbers("1,2,3,4,5");
-    try std.testing.expectEqual(5, numbers.len);
-    try std.testing.expectEqual(1, numbers[0]);
-    try std.testing.expectEqual(2, numbers[1]);
-    try std.testing.expectEqual(3, numbers[2]);
-    try std.testing.expectEqual(4, numbers[3]);
-    try std.testing.expectEqual(5, numbers[4]);
+    try std.testing.expectEqual(@as(u32, 5), numbers.len);
+    try std.testing.expectEqual(@as(u32, 1), numbers[0]);
+    try std.testing.expectEqual(@as(u32, 2), numbers[1]);
+    try std.testing.expectEqual(@as(u32, 3), numbers[2]);
+    try std.testing.expectEqual(@as(u32, 4), numbers[3]);
+    try std.testing.expectEqual(@as(u32, 5), numbers[4]);
 }
 
 test "getRowNumbers" {
     const numbers = getRowNumbers("1  2  3  4 5");
-    try std.testing.expectEqual(5, numbers.len);
-    try std.testing.expectEqual(1, numbers[0].value);
-    try std.testing.expectEqual(2, numbers[1].value);
-    try std.testing.expectEqual(3, numbers[2].value);
-    try std.testing.expectEqual(4, numbers[3].value);
-    try std.testing.expectEqual(5, numbers[4].value);
+    try std.testing.expectEqual(@as(u32, 5), numbers.len);
+    try std.testing.expectEqual(@as(u32, 1), numbers[0].value);
+    try std.testing.expectEqual(@as(u32, 2), numbers[1].value);
+    try std.testing.expectEqual(@as(u32, 3), numbers[2].value);
+    try std.testing.expectEqual(@as(u32, 4), numbers[3].value);
+    try std.testing.expectEqual(@as(u32, 5), numbers[4].value);
 }
 
 test "getGameData" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const lines = readFile.getLinesFromFile("day4_test.txt", allocator);
-    defer {
-        for (lines.items) |line| {
-            allocator.free(line);
-        }
-        lines.deinit();
-    }
     _ = getGameData(lines);
 }

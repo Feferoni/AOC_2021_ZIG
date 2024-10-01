@@ -157,13 +157,13 @@ pub fn part2(allocator: std.mem.Allocator) void {
 }
 
 test "bitsToNumber" {
-    try std.testing.expectEqual(0, bitsToDecimal("0000"));
-    try std.testing.expectEqual(1, bitsToDecimal("0001"));
-    try std.testing.expectEqual(2, bitsToDecimal("0010"));
-    try std.testing.expectEqual(4, bitsToDecimal("0100"));
-    try std.testing.expectEqual(8, bitsToDecimal("1000"));
-    try std.testing.expectEqual(14, bitsToDecimal("1110"));
-    try std.testing.expectEqual(15, bitsToDecimal("1111"));
+    try std.testing.expectEqual(@as(u64, 0), bitsToDecimal("0000"));
+    try std.testing.expectEqual(@as(u64, 1), bitsToDecimal("0001"));
+    try std.testing.expectEqual(@as(u64, 2), bitsToDecimal("0010"));
+    try std.testing.expectEqual(@as(u64, 4), bitsToDecimal("0100"));
+    try std.testing.expectEqual(@as(u64, 8), bitsToDecimal("1000"));
+    try std.testing.expectEqual(@as(u64, 14), bitsToDecimal("1110"));
+    try std.testing.expectEqual(@as(u64, 15), bitsToDecimal("1111"));
 }
 
 test "flipUpToMSB" {
@@ -174,33 +174,27 @@ test "flipUpToMSB" {
 }
 
 test "part1" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const lines = readFile.getLinesFromFile("day3_test.txt", allocator);
-    defer {
-        for (lines.items) |line| {
-            allocator.free(line);
-        }
-        lines.deinit();
-    }
 
     const bitCounts = calculateBitCounts(allocator, lines);
     defer allocator.free(bitCounts);
     const gammaRate = convertBitCountToGamma(allocator, bitCounts);
     const epsilonRate = flipUpToMSB(gammaRate);
-    try std.testing.expectEqual(22, gammaRate);
-    try std.testing.expectEqual(9, epsilonRate);
+    try std.testing.expectEqual(@as(u64, 22), gammaRate);
+    try std.testing.expectEqual(@as(u64, 9), epsilonRate);
 }
 
 test "part2" {
-    const allocator = std.testing.allocator;
-    var lines = readFile.getLinesFromFile("day3_test.txt", allocator);
-    defer {
-        for (lines.items) |line| {
-            allocator.free(line);
-        }
-        lines.deinit();
-    }
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
 
-    try std.testing.expectEqual(23, getPartTwoValue(lines, true));
-    try std.testing.expectEqual(10, getPartTwoValue(lines, false));
+    const lines = readFile.getLinesFromFile("day3_test.txt", allocator);
+
+    try std.testing.expectEqual(@as(u64, 23), getPartTwoValue(lines, true));
+    try std.testing.expectEqual(@as(u64, 10), getPartTwoValue(lines, false));
 }

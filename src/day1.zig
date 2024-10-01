@@ -17,7 +17,7 @@ fn convertStringsToNumbers(lines: std.ArrayList([]u8)) []u32 {
     return numbers.toOwnedSlice() catch unreachable;
 }
 
-fn getNumberOfIncreases1(depths: []const u32) u32 {
+fn getIncreaseCount(depths: []const u32) u32 {
     var count: u32 = 0;
 
     for (depths[1..], 0..) |curr, i| {
@@ -28,11 +28,11 @@ fn getNumberOfIncreases1(depths: []const u32) u32 {
     return count;
 }
 
-fn getNumberOfIncreases2(depths: []const u32, window_size: u32) u32 {
+fn getIncreaseCountSlidingWindow(depths: []const u32, window_size: u32) u32 {
     var count: u32 = 0;
 
     var i: usize = window_size + 1;
-    var prev: u32 = util.sumRange(depths, 0, window_size);
+    var prev: u32 = util.sumRange(depths, @as(usize, 0), window_size);
 
     while (i <= depths.len) : (i += 1) {
         const curr = util.sumRange(depths, i - window_size, i);
@@ -55,7 +55,7 @@ pub fn part1(allocator: std.mem.Allocator) void {
     const depthScan = convertStringsToNumbers(lines);
     defer std.heap.page_allocator.free(depthScan);
 
-    std.debug.print("part1 result: {}\n", .{getNumberOfIncreases1(depthScan)});
+    std.debug.print("part1 result: {}\n", .{getIncreaseCount(depthScan)});
 }
 
 pub fn part2(allocator: std.mem.Allocator) void {
@@ -70,15 +70,15 @@ pub fn part2(allocator: std.mem.Allocator) void {
     const depthScan = convertStringsToNumbers(lines);
     defer std.heap.page_allocator.free(depthScan);
 
-    std.debug.print("part2 result: {}\n", .{getNumberOfIncreases2(depthScan, 3)});
+    std.debug.print("part2 result: {}\n", .{getIncreaseCountSlidingWindow(depthScan, 3)});
 }
 
 test "part1" {
     const depthScan = [_]u32{ 199, 200, 208, 210, 200, 207, 240, 269, 260, 263 };
-    try std.testing.expectEqual(7, getNumberOfIncreases1(&depthScan));
+    try std.testing.expectEqual(7, getIncreaseCount(&depthScan));
 }
 
 test "part2" {
     const depthScan = [_]u32{ 199, 200, 208, 210, 200, 207, 240, 269, 260, 263 };
-    try std.testing.expectEqual(5, getNumberOfIncreases2(&depthScan, 3));
+    try std.testing.expectEqual(5, getIncreaseCountSlidingWindow(&depthScan, 3));
 }

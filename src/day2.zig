@@ -80,7 +80,7 @@ pub fn part1(allocator: std.mem.Allocator) void {
     const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
-    std.debug.print("Part1 value: {}\n", .{getPart1Value(instructions)});
+    std.debug.print("Part1 result: {}\n", .{getPart1Value(instructions)});
 }
 
 pub fn part2(allocator: std.mem.Allocator) void {
@@ -95,37 +95,31 @@ pub fn part2(allocator: std.mem.Allocator) void {
     const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
-    std.debug.print("Part2 value: {}\n", .{getPart2Value(instructions)});
+    std.debug.print("Part2 result: {}\n", .{getPart2Value(instructions)});
 }
 
 test "part1" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const lines = readFile.getLinesFromFile("day2_test.txt", allocator);
-    defer {
-        for (lines.items) |line| {
-            allocator.free(line);
-        }
-        lines.deinit();
-    }
 
     const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
-    try std.testing.expectEqual(150, getPart1Value(instructions));
+    try std.testing.expectEqual(@as(u32, 150), getPart1Value(instructions));
 }
 
 test "part2" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const lines = readFile.getLinesFromFile("day2_test.txt", allocator);
-    defer {
-        for (lines.items) |line| {
-            allocator.free(line);
-        }
-        lines.deinit();
-    }
 
     const instructions = convertLinesToInstructions(lines);
     defer std.heap.page_allocator.free(instructions);
 
-    try std.testing.expectEqual(900, getPart2Value(instructions));
+    try std.testing.expectEqual(@as(u32, 900), getPart2Value(instructions));
 }

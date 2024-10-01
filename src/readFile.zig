@@ -33,12 +33,9 @@ pub fn getLinesFromFile(filename: []const u8, allocator: std.mem.Allocator) std.
 }
 
 test "getLinesFromFile" {
-    const allocator = std.testing.allocator;
-    const lines = getLinesFromFile("day2_test.txt", allocator);
-    defer {
-        for (lines.items) |line| {
-            allocator.free(line);
-        }
-        lines.deinit();
-    }
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
+    _ = getLinesFromFile("day2_test.txt", allocator);
 }

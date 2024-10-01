@@ -24,5 +24,5 @@ pub fn main() !void {
     day3.part1(allocator);
     day3.part2(allocator);
     day4.part1(allocator);
-    // day4.part2(allocator);
+    day4.part2(allocator);
 }
