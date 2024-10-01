@@ -75,10 +75,10 @@ pub fn part2(allocator: std.mem.Allocator) void {
 
 test "part1" {
     const depthScan = [_]u32{ 199, 200, 208, 210, 200, 207, 240, 269, 260, 263 };
-    try std.testing.expectEqual(7, getIncreaseCount(&depthScan));
+    try std.testing.expectEqual(@as(u32, 7), getIncreaseCount(&depthScan));
 }
 
 test "part2" {
     const depthScan = [_]u32{ 199, 200, 208, 210, 200, 207, 240, 269, 260, 263 };
-    try std.testing.expectEqual(5, getIncreaseCountSlidingWindow(&depthScan, 3));
+    try std.testing.expectEqual(@as(u32, 5), getIncreaseCountSlidingWindow(&depthScan, 3));
 }
