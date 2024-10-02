@@ -26,29 +26,46 @@ const VentPlacement = struct {
         return self.x1 == self.x2;
     }
 
+    fn isPointingNorth(self: *const VentPlacement) bool {
+        return self.y1 > self.y2;
+    }
+
+    fn isPointingSouth(self: *const VentPlacement) bool {
+        return !self.isPointingNorth();
+    }
+
+    fn isPointingWest(self: *const VentPlacement) bool {
+        return self.x1 > self.x2;
+    }
+
+    fn isPointingEast(self: *const VentPlacement) bool {
+        return !self.isPointingWest();
+    }
+
     fn getDirection(self: *const VentPlacement) Direction {
         if (self.isHorizontal()) {
-            if (self.x1 > self.x2) {
+            if (self.isPointingWest()) {
                 return Direction.west;
             } else {
                 return Direction.east;
             }
         }
         if (self.isVertical()) {
-            if (self.y1 > self.y2) {
+            if (self.isPointingNorth()) {
                 return Direction.north;
             } else {
                 return Direction.south;
             }
         }
-        if (self.y1 > self.y2) {
-            if (self.x1 > self.x2) {
+
+        if (self.isPointingNorth()) {
+            if (self.isPointingWest()) {
                 return Direction.north_west;
             } else {
                 return Direction.north_east;
             }
         } else {
-            if (self.x1 > self.x2) {
+            if (self.isPointingWest()) {
                 return Direction.south_west;
             } else {
                 return Direction.south_east;
