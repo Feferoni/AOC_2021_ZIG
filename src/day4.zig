@@ -98,8 +98,8 @@ const GameData = struct {
     }
 };
 
-fn getDrawNumbers(line: []const u8) []u32 {
-    var drawNumbers = std.ArrayList(u32).init(std.heap.page_allocator);
+fn getDrawNumbers(allocator: std.mem.Allocator, line: []const u8) []u32 {
+    var drawNumbers = std.ArrayList(u32).init(allocator);
     errdefer drawNumbers.deinit();
 
     var iterator = std.mem.splitAny(u8, line, ",");
@@ -128,8 +128,8 @@ fn getRowNumbers(line: []const u8) [5]Entry {
     return rowNumbers;
 }
 
-fn getBoards(lines: [][]const u8) []Board {
-    var boards = std.ArrayList(Board).init(std.heap.page_allocator);
+fn getBoards(allocator: std.mem.Allocator, lines: [][]const u8) []Board {
+    var boards = std.ArrayList(Board).init(allocator);
     errdefer boards.deinit();
 
     var i: u32 = 0;
@@ -148,10 +148,10 @@ fn getBoards(lines: [][]const u8) []Board {
     return boards.toOwnedSlice() catch unreachable;
 }
 
-fn getGameData(lines: std.ArrayList([]u8)) GameData {
+fn getGameData(allocator: std.mem.Allocator, lines: std.ArrayList([]u8)) GameData {
     std.debug.assert((lines.items.len - 1) % 6 == 0);
-    const drawNumbers = getDrawNumbers(lines.items[0]);
-    const boards = getBoards(lines.items[2..]);
+    const drawNumbers = getDrawNumbers(allocator, lines.items[0]);
+    const boards = getBoards(allocator, lines.items[2..]);
     return GameData{ .drawNumbers = drawNumbers, .boards = boards };
 }
 
@@ -198,8 +198,11 @@ pub fn part1(allocator: std.mem.Allocator) void {
         lines.deinit();
     }
 
-    var game = getGameData(lines);
-
+    var game = getGameData(allocator, lines);
+    defer {
+        allocator.free(game.boards);
+        allocator.free(game.drawNumbers);
+    }
     std.debug.print("Part1 result: {}\n", .{playGamePart1(&game)});
 }
 
@@ -212,12 +215,20 @@ pub fn part2(allocator: std.mem.Allocator) void {
         lines.deinit();
     }
 
-    var game = getGameData(lines);
+    var game = getGameData(allocator, lines);
+    defer {
+        allocator.free(game.boards);
+        allocator.free(game.drawNumbers);
+    }
     std.debug.print("Part2 result: {}\n", .{playGamePart2(&game)});
 }
 
 test "getDrawNumbers" {
-    const numbers = getDrawNumbers("1,2,3,4,5");
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
+    const numbers = getDrawNumbers(allocator, "1,2,3,4,5");
     try std.testing.expectEqual(@as(u32, 5), numbers.len);
     try std.testing.expectEqual(@as(u32, 1), numbers[0]);
     try std.testing.expectEqual(@as(u32, 2), numbers[1]);
@@ -242,5 +253,5 @@ test "getGameData" {
     const allocator = arena.allocator();
 
     const lines = readFile.getLinesFromFile("day4_test.txt", allocator);
-    _ = getGameData(lines);
+    _ = getGameData(allocator, lines);
 }

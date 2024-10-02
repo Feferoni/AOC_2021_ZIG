@@ -12,8 +12,8 @@ fn getDirectionFromString(direction_str: []const u8) Direction {
     unreachable;
 }
 
-fn convertLinesToInstructions(lines: std.ArrayList([]u8)) []Instruction {
-    var instructions = std.ArrayList(Instruction).init(std.heap.page_allocator);
+fn convertLinesToInstructions(allocator: std.mem.Allocator, lines: std.ArrayList([]u8)) []Instruction {
+    var instructions = std.ArrayList(Instruction).init(allocator);
     errdefer instructions.deinit();
 
     for (lines.items) |line| {
@@ -77,8 +77,8 @@ pub fn part1(allocator: std.mem.Allocator) void {
         lines.deinit();
     }
 
-    const instructions = convertLinesToInstructions(lines);
-    defer std.heap.page_allocator.free(instructions);
+    const instructions = convertLinesToInstructions(allocator, lines);
+    defer allocator.free(instructions);
 
     std.debug.print("Part1 result: {}\n", .{getPart1Value(instructions)});
 }
@@ -92,8 +92,8 @@ pub fn part2(allocator: std.mem.Allocator) void {
         lines.deinit();
     }
 
-    const instructions = convertLinesToInstructions(lines);
-    defer std.heap.page_allocator.free(instructions);
+    const instructions = convertLinesToInstructions(allocator, lines);
+    defer allocator.free(instructions);
 
     std.debug.print("Part2 result: {}\n", .{getPart2Value(instructions)});
 }
@@ -105,8 +105,8 @@ test "part1" {
 
     const lines = readFile.getLinesFromFile("day2_test.txt", allocator);
 
-    const instructions = convertLinesToInstructions(lines);
-    defer std.heap.page_allocator.free(instructions);
+    const instructions = convertLinesToInstructions(allocator, lines);
+    defer allocator.free(instructions);
 
     try std.testing.expectEqual(@as(u32, 150), getPart1Value(instructions));
 }
@@ -118,8 +118,8 @@ test "part2" {
 
     const lines = readFile.getLinesFromFile("day2_test.txt", allocator);
 
-    const instructions = convertLinesToInstructions(lines);
-    defer std.heap.page_allocator.free(instructions);
+    const instructions = convertLinesToInstructions(allocator, lines);
+    defer allocator.free(instructions);
 
     try std.testing.expectEqual(@as(u32, 900), getPart2Value(instructions));
 }

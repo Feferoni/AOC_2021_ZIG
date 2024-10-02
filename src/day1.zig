@@ -2,8 +2,8 @@ const std = @import("std");
 const readFile = @import("readFile.zig");
 const util = @import("util.zig");
 
-fn convertStringsToNumbers(lines: std.ArrayList([]u8)) []u32 {
-    var numbers = std.ArrayList(u32).init(std.heap.page_allocator);
+fn convertStringsToNumbers(allocator: std.mem.Allocator, lines: std.ArrayList([]u8)) []u32 {
+    var numbers = std.ArrayList(u32).init(allocator);
     errdefer numbers.deinit();
 
     for (lines.items) |line| {
@@ -52,8 +52,8 @@ pub fn part1(allocator: std.mem.Allocator) void {
         lines.deinit();
     }
 
-    const depthScan = convertStringsToNumbers(lines);
-    defer std.heap.page_allocator.free(depthScan);
+    const depthScan = convertStringsToNumbers(allocator, lines);
+    defer allocator.free(depthScan);
 
     std.debug.print("part1 result: {}\n", .{getIncreaseCount(depthScan)});
 }
@@ -67,8 +67,8 @@ pub fn part2(allocator: std.mem.Allocator) void {
         lines.deinit();
     }
 
-    const depthScan = convertStringsToNumbers(lines);
-    defer std.heap.page_allocator.free(depthScan);
+    const depthScan = convertStringsToNumbers(allocator, lines);
+    defer allocator.free(depthScan);
 
     std.debug.print("part2 result: {}\n", .{getIncreaseCountSlidingWindow(depthScan, 3)});
 }
