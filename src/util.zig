@@ -1,7 +1,7 @@
 const std = @import("std");
 
-pub fn sumRange(slice: []const u32, start: usize, end: usize) u32 {
-    var sum: u32 = 0;
+pub fn sumRange(comptime T: type, slice: []const T, start: usize, end: usize) T {
+    var sum: T = 0;
     for (slice[start..end]) |num| {
         sum += num;
     }

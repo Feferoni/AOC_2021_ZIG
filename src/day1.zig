@@ -32,10 +32,10 @@ fn getIncreaseCountSlidingWindow(depths: []const u32, window_size: u32) u32 {
     var count: u32 = 0;
 
     var i: usize = window_size + 1;
-    var prev: u32 = util.sumRange(depths, @as(usize, 0), window_size);
+    var prev: u32 = util.sumRange(u32, depths, @as(usize, 0), window_size);
 
     while (i <= depths.len) : (i += 1) {
-        const curr = util.sumRange(depths, i - window_size, i);
+        const curr = util.sumRange(u32, depths, i - window_size, i);
         if (curr > prev) count += 1;
         prev = curr;
     }
