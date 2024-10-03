@@ -1,5 +1,5 @@
 const std = @import("std");
-const readFile = @import("readFile.zig");
+const util = @import("util.zig");
 
 const Direction = enum { forward, down, up };
 const Instruction = struct { direction: Direction, distance: u32 };
@@ -69,7 +69,7 @@ fn getPart2Value(instructions: []const Instruction) u32 {
 }
 
 pub fn part1(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day2.txt", allocator);
+    const lines = util.getLinesFromFile("day2.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
@@ -84,7 +84,7 @@ pub fn part1(allocator: std.mem.Allocator) void {
 }
 
 pub fn part2(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day2.txt", allocator);
+    const lines = util.getLinesFromFile("day2.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
@@ -103,7 +103,7 @@ test "part1" {
     defer arena.deinit();
     const allocator = arena.allocator();
 
-    const lines = readFile.getLinesFromFile("day2_test.txt", allocator);
+    const lines = util.getLinesFromFile("day2_test.txt", allocator);
 
     const instructions = convertLinesToInstructions(allocator, lines);
     defer allocator.free(instructions);
@@ -116,7 +116,7 @@ test "part2" {
     defer arena.deinit();
     const allocator = arena.allocator();
 
-    const lines = readFile.getLinesFromFile("day2_test.txt", allocator);
+    const lines = util.getLinesFromFile("day2_test.txt", allocator);
 
     const instructions = convertLinesToInstructions(allocator, lines);
     defer allocator.free(instructions);

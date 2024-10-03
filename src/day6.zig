@@ -1,5 +1,4 @@
 const std = @import("std");
-const readFile = @import("readFile.zig");
 const util = @import("util.zig");
 
 fn getInitalListOfFishes(allocator: std.mem.Allocator, lines: [][]const u8) []u64 {
@@ -44,7 +43,7 @@ fn calculateLaternFishesAfterDays(fishList: *[]u64, days: u32) u64 {
 }
 
 pub fn part1(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day6.txt", allocator);
+    const lines = util.getLinesFromFile("day6.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
@@ -60,7 +59,7 @@ pub fn part1(allocator: std.mem.Allocator) void {
 }
 
 pub fn part2(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day6.txt", allocator);
+    const lines = util.getLinesFromFile("day6.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);

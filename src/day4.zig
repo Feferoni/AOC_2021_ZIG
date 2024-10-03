@@ -1,5 +1,5 @@
 const std = @import("std");
-const readFile = @import("readFile.zig");
+const util = @import("util.zig");
 
 const Entry = struct {
     marked: bool = false,
@@ -190,7 +190,7 @@ fn playGamePart2(game: *GameData) u32 {
 }
 
 pub fn part1(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day4.txt", allocator);
+    const lines = util.getLinesFromFile("day4.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
@@ -207,7 +207,7 @@ pub fn part1(allocator: std.mem.Allocator) void {
 }
 
 pub fn part2(allocator: std.mem.Allocator) void {
-    var lines = readFile.getLinesFromFile("day4.txt", allocator);
+    var lines = util.getLinesFromFile("day4.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
@@ -252,6 +252,6 @@ test "getGameData" {
     defer arena.deinit();
     const allocator = arena.allocator();
 
-    const lines = readFile.getLinesFromFile("day4_test.txt", allocator);
+    const lines = util.getLinesFromFile("day4_test.txt", allocator);
     _ = getGameData(allocator, lines);
 }

@@ -1,5 +1,5 @@
 const std = @import("std");
-const readFile = @import("readFile.zig");
+const util = @import("util.zig");
 
 const Direction = enum {
     north,
@@ -217,7 +217,7 @@ fn getDangerNumber(ventPlacementMap: [][]const u32) u32 {
 }
 
 pub fn part1(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day5.txt", allocator);
+    const lines = util.getLinesFromFile("day5.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
@@ -244,7 +244,7 @@ pub fn part1(allocator: std.mem.Allocator) void {
 }
 
 pub fn part2(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day5.txt", allocator);
+    const lines = util.getLinesFromFile("day5.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);

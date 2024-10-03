@@ -1,5 +1,5 @@
 const std = @import("std");
-const readFile = @import("readFile.zig");
+const util = @import("util.zig");
 
 const BitCount = struct { zero: u32, one: u32 };
 
@@ -125,7 +125,7 @@ fn getPartTwoValue(lines: std.ArrayList([]u8), keepMostPresentBit: bool) u64 {
 }
 
 pub fn part1(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day3.txt", allocator);
+    const lines = util.getLinesFromFile("day3.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
@@ -142,7 +142,7 @@ pub fn part1(allocator: std.mem.Allocator) void {
 }
 
 pub fn part2(allocator: std.mem.Allocator) void {
-    var lines = readFile.getLinesFromFile("day3.txt", allocator);
+    var lines = util.getLinesFromFile("day3.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
@@ -178,7 +178,7 @@ test "part1" {
     defer arena.deinit();
     const allocator = arena.allocator();
 
-    const lines = readFile.getLinesFromFile("day3_test.txt", allocator);
+    const lines = util.getLinesFromFile("day3_test.txt", allocator);
 
     const bitCounts = calculateBitCounts(allocator, lines);
     defer allocator.free(bitCounts);
@@ -193,7 +193,7 @@ test "part2" {
     defer arena.deinit();
     const allocator = arena.allocator();
 
-    const lines = readFile.getLinesFromFile("day3_test.txt", allocator);
+    const lines = util.getLinesFromFile("day3_test.txt", allocator);
 
     try std.testing.expectEqual(@as(u64, 23), getPartTwoValue(lines, true));
     try std.testing.expectEqual(@as(u64, 10), getPartTwoValue(lines, false));

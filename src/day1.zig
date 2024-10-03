@@ -1,5 +1,4 @@
 const std = @import("std");
-const readFile = @import("readFile.zig");
 const util = @import("util.zig");
 
 fn convertStringsToNumbers(allocator: std.mem.Allocator, lines: std.ArrayList([]u8)) []u32 {
@@ -44,7 +43,7 @@ fn getIncreaseCountSlidingWindow(depths: []const u32, window_size: u32) u32 {
 }
 
 pub fn part1(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day1.txt", allocator);
+    const lines = util.getLinesFromFile("day1.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
@@ -59,7 +58,7 @@ pub fn part1(allocator: std.mem.Allocator) void {
 }
 
 pub fn part2(allocator: std.mem.Allocator) void {
-    const lines = readFile.getLinesFromFile("day1.txt", allocator);
+    const lines = util.getLinesFromFile("day1.txt", allocator);
     defer {
         for (lines.items) |line| {
             allocator.free(line);
