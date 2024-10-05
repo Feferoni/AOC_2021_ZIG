@@ -13,9 +13,24 @@ pub fn getNumbersFromLine(comptime T: type, allocator: std.mem.Allocator, line: 
 }
 
 pub fn sumRange(comptime T: type, slice: []const T, start: usize, end: usize) T {
+    std.debug.assert(start <= slice.len);
+    std.debug.assert(start <= end and end <= slice.len);
+
     var sum: T = 0;
     for (slice[start..end]) |num| {
         sum += num;
+    }
+    return sum;
+}
+
+pub fn multiplyRange(comptime T: type, slice: []const T, start: usize, end: usize) T {
+    std.debug.assert(start <= slice.len);
+    std.debug.assert(start <= end and end <= slice.len);
+
+    if (start == end) return slice[start];
+    var sum: T = slice[start];
+    for (slice[start + 1 .. end]) |num| {
+        sum *= num;
     }
     return sum;
 }
