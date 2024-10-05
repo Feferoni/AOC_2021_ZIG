@@ -2,7 +2,9 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
+    const optimize = b.standardOptimizeOption(.{
+        .preferred_optimize_mode = .Debug,
+    });
 
     const exe = b.addExecutable(.{
         .name = "AOC_2021_ZIG",
@@ -10,6 +12,10 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+
+    exe.want_lto = false;
+    exe.bundle_compiler_rt = true;
+
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
