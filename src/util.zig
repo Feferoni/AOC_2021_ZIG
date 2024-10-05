@@ -35,6 +35,29 @@ pub fn multiplyRange(comptime T: type, slice: []const T, start: usize, end: usiz
     return sum;
 }
 
+pub fn diagnoseString(chars: []const u8) void {
+    std.debug.print("String diagnosis:\n", .{});
+    std.debug.print("1. Reported length: {}\n", .{chars.len});
+    std.debug.print("2. Reported content: '{s}'\n", .{chars});
+    std.debug.print("3. Byte-by-byte analysis:\n", .{});
+
+    for (chars, 0..) |byte, i| {
+        std.debug.print("   Byte {}: {x:0>2} ('{c}', {})\n", .{ i, byte, if (std.ascii.isPrint(byte)) byte else '.', byte });
+    }
+
+    std.debug.print("4. Pointer analysis:\n", .{});
+    std.debug.print("   Slice ptr: {*}\n", .{chars.ptr});
+    std.debug.print("   First 8 bytes from ptr: ", .{});
+    for (0..8) |i| {
+        if (i < chars.len) {
+            std.debug.print("{x:0>2} ", .{chars[i]});
+        } else {
+            std.debug.print("?? ", .{});
+        }
+    }
+    std.debug.print("\n", .{});
+}
+
 pub fn getLinesFromFile(filename: []const u8, allocator: std.mem.Allocator) std.ArrayList([]u8) {
     const prefix_path = "./input/";
     var path_buffer: [std.fs.max_path_bytes]u8 = undefined;
