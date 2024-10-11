@@ -1,5 +1,31 @@
 const std = @import("std");
 
+pub fn isUppercase(str: []const u8) bool {
+    for (str) |char| {
+        if (!std.ascii.isUpper(char)) {
+            return false;
+        }
+    }
+    return str.len > 0;
+}
+
+pub fn isLowercase(str: []const u8) bool {
+    for (str) |char| {
+        if (!std.ascii.isLower(char)) {
+            return false;
+        }
+    }
+    return str.len > 0;
+}
+
+pub fn countInstances(value: []const u8, array: [][]const u8) u32 {
+    var counter: u32 = 0;
+    for (array) |curr| {
+        if (value.ptr == curr.ptr) counter += 1;
+    }
+    return counter;
+}
+
 pub fn getNumbersFromLine(comptime T: type, allocator: std.mem.Allocator, line: []const u8, delimiters: []const u8) []T {
     var numbers = std.ArrayList(T).init(allocator);
 
@@ -33,6 +59,13 @@ pub fn multiplyRange(comptime T: type, slice: []const T, start: usize, end: usiz
         sum *= num;
     }
     return sum;
+}
+
+pub fn printSlice(comptime T: type, slice: []const T) void {
+    for (slice) |item| {
+        std.debug.print("{s} ", .{item});
+    }
+    std.debug.print("\n", .{});
 }
 
 pub fn diagnoseString(chars: []const u8) void {

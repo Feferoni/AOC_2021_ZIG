@@ -10,6 +10,7 @@ const day8 = @import("day8.zig");
 const day9 = @import("day9.zig");
 const day10 = @import("day10.zig");
 const day11 = @import("day11.zig");
+const day12 = @import("day12.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -22,7 +23,11 @@ pub fn main() !void {
             },
         }
     }
-    const allocator = gpa.allocator();
+    const gpa_allocator = gpa.allocator();
+
+    var arena = std.heap.ArenaAllocator.init(gpa_allocator);
+    defer arena.deinit();
+    const arena_allocator = arena.allocator();
 
     // day1.part1(allocator);
     // day1.part2(allocator);
@@ -44,6 +49,8 @@ pub fn main() !void {
     // day9.part2(allocator);
     // day10.part1(allocator);
     // day10.part2(allocator);
-    day11.part1(allocator);
-    day11.part2(allocator);
+    // day11.part1(allocator);
+    // day11.part2(allocator);
+    day12.part1(arena_allocator);
+    day12.part2(arena_allocator);
 }
