@@ -51,6 +51,6 @@ pub fn main() !void {
     // day10.part2(allocator);
     // day11.part1(allocator);
     // day11.part2(allocator);
-    day12.part1(arena_allocator);
+    // day12.part1(arena_allocator);
     day12.part2(arena_allocator);
 }

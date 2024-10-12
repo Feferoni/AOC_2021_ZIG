@@ -73,11 +73,11 @@ fn Graph() type {
                 return Path{ .nodes = std.ArrayList([]const u8).init(allocator), .visitedTwice = false, .allocator = allocator };
             }
 
-            fn deinit(self: *Path) void {
+            fn deinit(self: *const Path) void {
                 self.nodes.deinit();
             }
 
-            fn clone(self: *Path) !Path {
+            fn clone(self: *const Path) !Path {
                 var new_path = try Path.init(self.allocator);
                 new_path.visitedTwice = self.visitedTwice;
                 try new_path.nodes.appendSlice(self.nodes.items);
@@ -88,7 +88,7 @@ fn Graph() type {
         pub fn findAllPaths(self: *Self, start: []const u8, end: []const u8) !std.ArrayList(std.ArrayList([]const u8)) {
             var all_valid_paths = std.ArrayList(std.ArrayList([]const u8)).init(self.allocator);
 
-            var all_paths = try std.ArrayList(std.ArrayList([]const u8)).initCapacity(self.allocator, 100000);
+            var all_paths = std.ArrayList(std.ArrayList([]const u8)).init(self.allocator);
             defer all_paths.deinit();
 
             const start_node = self.getNode(start) orelse return error.StartNodeNotFound;
@@ -125,50 +125,53 @@ fn Graph() type {
             return all_valid_paths;
         }
 
+        const Path2 = struct {
+            last_node: *Node,
+            prev_index: usize,
+            visited_twice: bool,
+        };
+
         pub fn findAllPaths2(self: *Self, start: []const u8, end: []const u8) !u32 {
             var path_count: u32 = 0;
-
-            var different_paths = try std.ArrayList(Path).initCapacity(self.allocator, 100000);
-            defer different_paths.deinit();
 
             const start_node = self.getNode(start) orelse return error.StartNodeNotFound;
             const end_node = self.getNode(end) orelse return error.EndNodeNotFound;
 
-            // Adding path item to
-            var path_item = try Path.init(self.allocator);
-            try path_item.nodes.append(start_node.name);
+            // Keeps track of the node traversal, by storing the node, the index in the current path it is standing on and anyone has been visited twice
+            var path_state = std.ArrayList(Path2).init(self.allocator);
+            defer path_state.deinit();
 
-            try different_paths.append(path_item);
+            // Keeps track of the current path
+            var curr_path = std.ArrayList([]const u8).init(self.allocator);
+            defer curr_path.deinit();
 
-            while (different_paths.items.len > 0) {
-                var current_path = different_paths.pop();
-                defer current_path.deinit();
+            try path_state.append(.{ .last_node = start_node, .prev_index = 0, .visited_twice = false });
 
-                const curr_name = current_path.nodes.getLastOrNull() orelse unreachable;
-                if (end_node.name.ptr == curr_name.ptr) {
+            while (path_state.popOrNull()) |curr_path_state| {
+                curr_path.shrinkRetainingCapacity(curr_path_state.prev_index);
+                if (end_node.name.ptr == curr_path_state.last_node.name.ptr) {
                     path_count += 1;
                     continue;
                 }
 
-                const curr_node = self.getNode(curr_name) orelse return error.NodeNotFound;
-                for (curr_node.neighbour.items) |neighbour| {
+                try curr_path.append(curr_path_state.last_node.name);
+                const current_index = curr_path.items.len;
+
+                for (curr_path_state.last_node.neighbour.items) |neighbour| {
                     // Not allowed to repeat start
                     if (start_node.name.ptr == neighbour.name.ptr) continue;
 
                     // Conditions for creating a new path
                     if (util.isUppercase(neighbour.name)) {
-                        var new_path = try current_path.clone();
-                        try new_path.nodes.append(neighbour.name);
-                        try different_paths.append(new_path);
-                    } else if (current_path.visitedTwice == false and util.countInstances(neighbour.name, current_path.nodes.items) == 1) {
-                        var new_path = try current_path.clone();
-                        try new_path.nodes.append(neighbour.name);
-                        new_path.visitedTwice = true;
-                        try different_paths.append(new_path);
-                    } else if (util.countInstances(neighbour.name, current_path.nodes.items) == 0) {
-                        var new_path = try current_path.clone();
-                        try new_path.nodes.append(neighbour.name);
-                        try different_paths.append(new_path);
+                        try path_state.append(Path2{
+                            .last_node = neighbour,
+                            .prev_index = current_index,
+                            .visited_twice = curr_path_state.visited_twice,
+                        });
+                    } else if (util.countInstances(neighbour.name, curr_path.items) == 0) {
+                        try path_state.append(Path2{ .last_node = neighbour, .prev_index = current_index, .visited_twice = curr_path_state.visited_twice });
+                    } else if (curr_path_state.visited_twice == false and util.countInstances(neighbour.name, curr_path.items) == 1) {
+                        try path_state.append(Path2{ .last_node = neighbour, .prev_index = current_index, .visited_twice = true });
                     }
                 }
             }
@@ -255,30 +258,4 @@ pub fn part2(allocator: std.mem.Allocator) void {
     defer graph.deinit();
 
     std.debug.print("Part2 result: {}\n", .{findAllPaths2(graph)});
-}
-
-test "insertAndPrint" {
-    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
-
-    var graph = Graph(bool).init(allocator);
-    defer graph.deinit();
-
-    try graph.addNode("start", false);
-    try graph.setStartNode("start");
-    try graph.addNode("A", true);
-    try graph.addNode("b", false);
-    try graph.addNode("c", false);
-    try graph.addNode("d", false);
-    try graph.addNode("end", false);
-    try graph.createEdge("start", "A");
-    try graph.createEdge("start", "b");
-    try graph.createEdge("A", "c");
-    try graph.createEdge("A", "b");
-    try graph.createEdge("b", "d");
-    try graph.createEdge("A", "end");
-    try graph.createEdge("b", "end");
-
-    graph.print();
 }
